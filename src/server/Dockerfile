@@ -66,4 +66,4 @@ COPY --from=builder /app/.next/static ./.next/static
 # Let Railway define the PORT
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["server.js"]
