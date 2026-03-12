@@ -24,10 +24,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    GITHUB_TOKEN:
-      process.env.NODE_ENV === "test"
-        ? z.preprocess(() => "fake_github_token", z.string())
-        : z.string(),
+    GITHUB_TOKEN: z.string().optional(),
     AWS_ACCESS_KEY_ID: z.string().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().optional(),
     AWS_BUCKET_NAME:
@@ -38,36 +35,19 @@ export const env = createEnv({
       process.env.NODE_ENV === "test"
         ? z.preprocess(() => "fake_aws_region", z.string())
         : z.string(),
-    ECS_TASK_DEFINITION_MEET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().default(""),
-    ECS_TASK_DEFINITION_TEAMS:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().default(""),
-    ECS_TASK_DEFINITION_ZOOM:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().default(""),
-    ECS_CLUSTER_NAME:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().default(""),
-    ECS_SUBNETS:
-      process.env.NODE_ENV === "production"
-        ? z.preprocess(
-            (val) => (typeof val === "string" ? val.split(",") : []),
-            z.array(z.string()),
-          )
-        : z.array(z.string()).default([]),
-    ECS_SECURITY_GROUPS:
-      process.env.NODE_ENV === "production"
-        ? z.preprocess(
-            (val) => (typeof val === "string" ? val.split(",") : []),
-            z.array(z.string()),
-          )
-        : z.array(z.string()).default([]),
+    // AWS ECS variables are now optional as we migrate to Railway/BullMQ
+    ECS_TASK_DEFINITION_MEET: z.string().optional(),
+    ECS_TASK_DEFINITION_TEAMS: z.string().optional(),
+    ECS_TASK_DEFINITION_ZOOM: z.string().optional(),
+    ECS_CLUSTER_NAME: z.string().optional(),
+    ECS_SUBNETS: z.preprocess(
+      (val) => (typeof val === "string" ? val.split(",") : []),
+      z.array(z.string()),
+    ).optional(),
+    ECS_SECURITY_GROUPS: z.preprocess(
+      (val) => (typeof val === "string" ? val.split(",") : []),
+      z.array(z.string()),
+    ).optional(),
   },
 
   /**
