@@ -19,13 +19,8 @@ export const env = createEnv({
       process.env.NODE_ENV === "test"
         ? z.preprocess(() => "fake_github_secret", z.string())
         : z.string(),
-    DATABASE_URL:
-      process.env.NODE_ENV === "test"
-        ? z.preprocess(
-            () => "postgresql://fake_user:fake_password@localhost:5432/fake_db",
-            z.string(),
-          )
-        : z.string().url().startsWith("postgresql://"),
+    DATABASE_URL: z.string().url().startsWith("postgresql://"),
+    REDIS_URL: z.string().url().startsWith("redis://").optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -93,6 +88,7 @@ export const env = createEnv({
     AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
     AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
+    REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,

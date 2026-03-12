@@ -72,7 +72,7 @@ COPY --from=base /app/meet/node_modules /app/meet/node_modules
 COPY --from=base /app/meet/package.json /app/meet/package.json
 COPY --from=base /app/meet/pnpm-lock.yaml /app/meet/pnpm-lock.yaml
 COPY --from=base /root/ms-playwright /root/ms-playwright
-COPY --from=base /app/meet/entrypoint.sh /app/entrypoint.sh
+COPY ./entrypoint.sh /app/entrypoint.sh
 
 # Make all files available to the meetbot user
 RUN chown -R meetbot:meetbot /app
@@ -88,7 +88,7 @@ RUN chown -R meetbot:meetbot ./meet/src
 # Expose display port
 ENV DISPLAY=:99
 
-# # Run Command
+# Run Command
 USER meetbot
-RUN chmod +x ./entrypoint.sh
-CMD ["./entrypoint.sh"]
+RUN chmod +x /app/entrypoint.sh
+CMD ["/app/entrypoint.sh"]
