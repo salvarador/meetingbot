@@ -19,7 +19,7 @@ const redisConnection = env.REDIS_URL ? new IORedis(env.REDIS_URL, {
 }) : null;
 
 const botQueue = redisConnection ? new Queue("bot-queue", {
-  connection: redisConnection,
+  connection: redisConnection as any,
 }) : null;
 
 export class BotDeploymentError extends Error {
