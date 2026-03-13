@@ -96,9 +96,14 @@ const worker = new Worker(
       await trpc.bots.updateTranscriptionStatus.mutate({ id: botId, status: "PROCESSING" });
 
       // 2. Download from R2
-      console.log(`Downloading ${recordingKey} from R2...`);
+      const bucketName = process.env.AWS_BUCKET_NAME!;
+      console.log(`📥 Attempting to download from R2:`);
+      console.log(`   - Bucket: ${bucketName}`);
+      console.log(`   - Key: ${recordingKey}`);
+      console.log(`   - Full simulated path: ${process.env.S3_ENDPOINT}/${bucketName}/${recordingKey}`);
+
       const response = await s3Client.send(new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME!,
+        Bucket: bucketName,
         Key: recordingKey,
       }));
 
