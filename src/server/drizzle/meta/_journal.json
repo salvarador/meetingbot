@@ -15,6 +15,13 @@
       "when": 1754528997524,
       "tag": "0001_massive_living_tribunal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773411810472,
+      "tag": "0002_freezing_gorilla_man",
+      "breakpoints": true
     }
   ]
 }
