@@ -65,8 +65,11 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
+# Copy database config and schema for migrations
+COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/src ./src
+
 # Ensure drizzle-kit and its dependencies are available for migrations
-# (Standalone mode might not include them if they are devDeps)
 COPY --from=builder /app/node_modules ./node_modules
 
 # Let Railway define the PORT
