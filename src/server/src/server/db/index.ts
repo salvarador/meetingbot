@@ -28,10 +28,22 @@ export const db = drizzle(conn, { schema });
 
 // Run migrations in production automatically
 if (env.NODE_ENV === "production" || process.env.RUN_MIGRATIONS === "true") {
-  console.log("Running database migrations...");
-  migrate(db, { migrationsFolder: path.resolve(process.cwd(), "drizzle") })
-    .then(() => console.log("Migrations completed successfully"))
-    .catch((err) => {
-      console.error("Migration failed:", err);
+  const runMigration = async () => {
+    // FORCE RESET LOGIC: Only if RESET_DATABASE="true"
+    if (process.env.RESET_DATABASE === "true") {
+      console.log("⚠️ RESET_DATABASE is true. Dropping public schema...");
+      await db.execute(sql`DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;`);
+      console.log("✅ Public schema reset successfully.");
+    }
+
+    console.log("Running database migrations...");
+    await migrate(db, { 
+      migrationsFolder: path.resolve(process.cwd(), "drizzle")
     });
+    console.log("Migrations completed successfully");
+  };
+
+  runMigration().catch((err) => {
+    console.error("Migration failed:", err);
+  });
 }
