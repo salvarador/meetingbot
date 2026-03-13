@@ -145,8 +145,9 @@ const worker = new Worker(
           language: "es",
           gen_file_txt: false,
           condition_on_previous_text: false,
-          // Help the model detect speech even if volume is low
-          temperature: 0, 
+          temperature: 0,
+          // Initial prompt helps the model understand the context and language
+          prompt: "Esta es una transcripción de una reunión grabada en español. Hablamos sobre temas de trabajo y proyectos.",
         }
       });
 
