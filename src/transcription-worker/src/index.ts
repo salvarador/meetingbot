@@ -34,10 +34,23 @@ const s3Client = new S3Client({
 });
 
 const getBackendUrl = () => {
-  let url = process.env.BACKEND_URL || "http://localhost:3001";
-  if (!url.startsWith("http")) url = `https://${url}`;
-  if (url.endsWith("/")) url = url.slice(0, -1);
-  if (!url.endsWith("/api/trpc")) url = `${url}/api/trpc`;
+  let url = (process.env.BACKEND_URL || "http://localhost:3001").trim();
+  
+  // Ensure the URL has a protocol
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = `https://${url}`;
+  }
+
+  // Remove trailing slash if present
+  if (url.endsWith("/")) {
+    url = url.slice(0, -1);
+  }
+
+  // Ensure it doesn't already end with /api/trpc before appending it
+  if (!url.endsWith("/api/trpc")) {
+    url = `${url}/api/trpc`;
+  }
+  
   return url;
 };
 
