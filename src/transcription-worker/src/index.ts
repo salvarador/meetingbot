@@ -15,8 +15,22 @@ dotenv.config();
 
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) {
-  console.error("REDIS_URL is required");
+  console.error("❌ REDIS_URL is required");
   process.exit(1);
+}
+
+// Validate R2 Credentials
+const requiredR2Vars = [
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
+  "AWS_BUCKET_NAME",
+  "S3_ENDPOINT"
+];
+
+for (const v of requiredR2Vars) {
+  if (!process.env[v]) {
+    console.error(`❌ Environment variable ${v} is MISSING in Railway settings!`);
+  }
 }
 
 const connection = new IORedis(redisUrl, {
@@ -28,8 +42,8 @@ const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "missing",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "missing",
   },
 });
 
