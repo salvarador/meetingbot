@@ -17,12 +17,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-# Note: whisper-node will compile whisper.cpp during this step
 RUN pnpm install
-
-# Pre-download the whisper model (optional but recommended for speed)
-# This uses the internal script of whisper-node if available or we manually triggers it
-RUN npx tsx -e 'import { downloadModel } from "whisper-node"; downloadModel("base")'
 
 COPY . .
 
