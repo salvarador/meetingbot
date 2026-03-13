@@ -49,21 +49,27 @@ RUN \
 
 ##### RUNNER
 
-FROM --platform=linux/amd64 gcr.io/distroless/nodejs20-debian12 AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
 
-# ENV NEXT_TELEMETRY_DISABLED 1
+# Install openssl for Prisma/Drizzle if needed
+RUN apk add --no-cache openssl
 
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
+# Copy standalone build and static files
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Ensure drizzle-kit and its dependencies are available for migrations
+# (Standalone mode might not include them if they are devDeps)
+COPY --from=builder /app/node_modules ./node_modules
 
 # Let Railway define the PORT
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["server.js"]
+CMD ["node", "server.js"]
