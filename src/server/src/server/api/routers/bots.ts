@@ -14,6 +14,7 @@ import { eq, sql, and, notInArray } from "drizzle-orm";
 import { deployBot, shouldDeployImmediately } from "../services/botDeployment";
 import { extractCount } from "~/server/utils/database";
 import { generateSignedUrl } from "~/server/utils/s3";
+import { env } from "~/env";
 
 export const botsRouter = createTRPCRouter({
   getBots: protectedProcedure
