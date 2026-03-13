@@ -7,6 +7,7 @@ import {
   selectBotSchema,
   insertEventSchema,
   status,
+  transcriptionStatus,
   speakerTimeframeSchema,
 } from "../../db/schema";
 import { eq, sql, and, notInArray } from "drizzle-orm";
@@ -361,6 +362,49 @@ export const botsRouter = createTRPCRouter({
         botId: input.id,
         db: ctx.db,
       });
+    }),
+
+  updateTranscriptionStatus: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        status: transcriptionStatus,
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const result = await ctx.db
+        .update(bots)
+        .set({ transcriptionStatus: input.status })
+        .where(eq(bots.id, input.id))
+        .returning();
+
+      if (!result[0]) {
+        throw new Error("Bot not found");
+      }
+      return result[0];
+    }),
+
+  saveTranscription: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        transcription: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const result = await ctx.db
+        .update(bots)
+        .set({
+          transcription: input.transcription,
+          transcriptionStatus: "COMPLETED",
+        })
+        .where(eq(bots.id, input.id))
+        .returning();
+
+      if (!result[0]) {
+        throw new Error("Bot not found");
+      }
+      return result[0];
     }),
 
   getActiveBotCount: protectedProcedure

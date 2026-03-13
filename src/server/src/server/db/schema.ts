@@ -199,6 +199,14 @@ export const status = z.enum([
 ]);
 export type Status = z.infer<typeof status>;
 
+export const transcriptionStatus = z.enum([
+  "PENDING",
+  "PROCESSING",
+  "COMPLETED",
+  "FAILED",
+]);
+export type TranscriptionStatus = z.infer<typeof transcriptionStatus>;
+
 // Event codes include all status codes plus additional event-only codes
 const allEventCodes = [
   ...status.options,
@@ -260,6 +268,11 @@ export const bots = pgTable("bots", {
     .notNull()
     .default("READY_TO_DEPLOY"),
   deploymentError: varchar("deployment_error", { length: 1024 }),
+  // transcription stuff
+  transcription: text("transcription"),
+  transcriptionStatus: varchar("transcription_status", { length: 255 })
+    .$type<TranscriptionStatus>()
+    .default("PENDING"),
   // config
   heartbeatInterval: integer("heartbeat_interval").notNull(),
   automaticLeave: json("automatic_leave").$type<AutomaticLeave>().notNull(),

@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { startHeartbeat, reportEvent } from "./monitoring";
 import { EventCode, type BotConfig } from "./types";
 import { createS3Client, uploadRecordingToS3 } from "./s3";
+import { Queue } from "bullmq";
+import IORedis from "ioredis";
 
 dotenv.config({path: '../test.env'}); // Load test.env for testing
 dotenv.config();
@@ -86,6 +88,27 @@ export const main = async () => {
   // After S3 upload and cleanup, stop the heartbeat
   heartbeatController.abort();
   console.log("Bot execution completed, heartbeat stopped.");
+
+  // Enqueue transcription job if recording was successful
+  if (!hasErrorOccurred && key && process.env.REDIS_URL) {
+    try {
+      const redisConnection = new IORedis(process.env.REDIS_URL, {
+        maxRetriesPerRequest: null,
+      });
+      const transcriptionQueue = new Queue("transcription-queue", {
+        connection: redisConnection,
+      });
+      await transcriptionQueue.add(`transcribe-${botId}`, {
+        botId,
+        recordingKey: key,
+      });
+      console.log(`Transcription job for bot ${botId} enqueued in Redis`);
+      // We don't wait for quit here to avoid slowing down exit
+      void redisConnection.quit();
+    } catch (error) {
+      console.error("Failed to enqueue transcription job:", error);
+    }
+  }
 
   // Only report DONE if no error occurred
   if (!hasErrorOccurred) {
