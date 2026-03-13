@@ -68,6 +68,7 @@ COPY --from=builder /app/.next/static ./.next/static
 # Copy database config and schema for migrations
 COPY --from=builder /app/drizzle.config.ts ./
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/drizzle ./drizzle
 
 # Ensure drizzle-kit and its dependencies are available for migrations
 COPY --from=builder /app/node_modules ./node_modules
