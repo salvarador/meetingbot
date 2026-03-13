@@ -52,7 +52,7 @@ export function CreateBotDialog() {
       botDisplayName,
       meetingTitle: "Test Meeting",
       meetingInfo: {
-        url: meetingUrl,
+        meetingUrl,
         platform,
       },
       // Other fields will use defaults from the router
