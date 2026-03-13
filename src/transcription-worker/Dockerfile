@@ -22,7 +22,7 @@ RUN pnpm install
 # Download the whisper model manually to avoid interactive TTY errors
 # We place it in the default directory where whisper-node expects it
 RUN mkdir -p ./node_modules/whisper-node/lib/whisper.cpp/models && \
-    wget -O ./node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
+    wget -O ./node_modules/whisper-node/lib/whisper.cpp/models/ggml-small.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
 
 COPY . .
 

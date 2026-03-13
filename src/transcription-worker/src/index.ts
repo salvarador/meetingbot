@@ -114,25 +114,27 @@ const worker = new Worker(
           .on("error", reject);
       });
 
-      // 3. Extract audio (WAV 16kHz Mono - required by whisper.cpp)
-      console.log("Extracting audio with FFmpeg...");
+      // 3. Extract audio (WAV 16kHz Mono + Normalization)
+      console.log("Extracting and normalizing audio with FFmpeg...");
       await new Promise((resolve, reject) => {
         ffmpeg(inputPath)
           .toFormat("wav")
           .audioChannels(1)
           .audioFrequency(16000)
+          .audioFilters('loudnorm') // Normalize volume to improve voice detection
           .on("end", resolve)
           .on("error", reject)
           .save(outputPath);
       });
 
-      // 4. Transcribe with Whisper (Spanish)
-      console.log("Transcribing with Whisper...");
+      // 4. Transcribe with Whisper (Spanish - Small Model)
+      console.log("Transcribing with Whisper (Small model)...");
       const transcriptions = await whisper(outputPath, {
-        modelName: "base",
+        modelName: "small", // Using 'small' for much better Spanish accuracy
         whisperOptions: {
           language: "es",
           gen_file_txt: false,
+          // Suppress common hallucination tokens if possible through prompt or better model
         }
       });
 
