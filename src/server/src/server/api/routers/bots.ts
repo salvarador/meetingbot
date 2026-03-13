@@ -407,6 +407,45 @@ export const botsRouter = createTRPCRouter({
       return result[0];
     }),
 
+  retryTranscription: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const bot = (await ctx.db.select().from(bots).where(eq(bots.id, input.id)))[0];
+      if (!bot || bot.userId !== ctx.session.user.id) {
+        throw new Error("Bot not found or access denied");
+      }
+
+      if (!bot.recording) {
+        throw new Error("Bot has no recording to transcribe");
+      }
+
+      // Initialize Redis connection for BullMQ
+      const IORedis = (await import("ioredis")).default;
+      const { Queue } = await import("bullmq");
+      
+      const redisConnection = env.REDIS_URL ? new IORedis(env.REDIS_URL, {
+        maxRetriesPerRequest: null,
+      }) : null;
+
+      if (!redisConnection) throw new Error("Redis not configured");
+
+      const transcriptionQueue = new Queue("transcription-queue", {
+        connection: redisConnection as any,
+      });
+
+      await transcriptionQueue.add(`transcribe-${bot.id}`, {
+        botId: bot.id,
+        recordingKey: bot.recording,
+      });
+
+      await ctx.db.update(bots)
+        .set({ transcriptionStatus: "PENDING" })
+        .where(eq(bots.id, bot.id));
+
+      await redisConnection.quit();
+      return { success: true };
+    }),
+
   getActiveBotCount: protectedProcedure
     .meta({
       openapi: {

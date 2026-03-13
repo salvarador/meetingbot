@@ -16,7 +16,9 @@ import ErrorAlert from "~/components/custom/ErrorAlert";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Badge } from "~/components/ui/badge";
 import Link from "next/link";
-import { ExternalLinkIcon } from "lucide-react";
+import { ExternalLinkIcon, RefreshCw } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 
 interface BotDetailsDialogProps {
   botId: number | null;
@@ -38,6 +40,17 @@ export function BotDetailsDialog({ botId, onClose }: BotDetailsDialogProps) {
     { botId: botId! },
     { enabled: !!botId },
   );
+
+  const utils = api.useUtils();
+  const retryTranscription = api.bots.retryTranscription.useMutation({
+    onSuccess: () => {
+      toast.success("Transcription job re-enqueued!");
+      void utils.bots.getBot.invalidate({ id: botId! });
+    },
+    onError: (error) => {
+      toast.error(`Retry failed: ${error.message}`);
+    },
+  });
 
   const eventColumns: ColumnDef<(typeof events)[number]>[] = [
     {
@@ -171,6 +184,35 @@ export function BotDetailsDialog({ botId, onClose }: BotDetailsDialogProps) {
               </div>
             </div>
           )}
+
+          {!botLoading && bot?.recording && (
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Transcription</h3>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => retryTranscription.mutate({ id: botId! })}
+                  disabled={retryTranscription.isPending}
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${retryTranscription.isPending ? 'animate-spin' : ''}`} />
+                  Retry Transcription
+                </Button>
+              </div>
+              <div className="space-y-1 text-sm">
+                <p>
+                  <span className="font-medium">Status:</span>{" "}
+                  <Badge variant="secondary">{bot?.transcriptionStatus ?? "PENDING"}</Badge>
+                </p>
+                {bot?.transcription && (
+                  <div className="mt-2 rounded-md bg-slate-50 p-3 max-h-40 overflow-y-auto italic text-gray-700 border">
+                    "{bot.transcription}"
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <h3 className="font-semibold">Event Log</h3>
             <DataTable
