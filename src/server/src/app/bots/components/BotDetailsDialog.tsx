@@ -206,7 +206,7 @@ export function BotDetailsDialog({ botId, onClose }: BotDetailsDialogProps) {
                 </p>
                 {bot?.transcription && (
                   <div className="mt-2 rounded-md bg-slate-50 p-3 max-h-40 overflow-y-auto italic text-gray-700 border">
-                    "{bot.transcription}"
+                    &quot;{bot.transcription}&quot;
                   </div>
                 )}
               </div>

@@ -431,6 +431,7 @@ export const botsRouter = createTRPCRouter({
       if (!redisConnection) throw new Error("Redis not configured");
 
       const transcriptionQueue = new Queue("transcription-queue", {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
         connection: redisConnection as any,
       });
 
