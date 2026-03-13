@@ -15,22 +15,24 @@ export function createS3Client(region: string | undefined, accessKeyId: string |
         if (!region)
             throw new Error("Region is required");
 
+        const endpoint = process.env.S3_ENDPOINT;
+
         // Create an S3 client with credentials if they are provided
-        // Local Development requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
         if (accessKeyId && secretKey) {
             return new S3Client({
                 region,
+                endpoint,
+                forcePathStyle: true, // Required for R2
                 credentials: {
                     accessKeyId: accessKeyId,
                     secretAccessKey: secretKey!,
                 },
             });
-
-            // Production
-            // Credientials is not required on AWS, so we can use the default constructor.
         } else {
             return new S3Client({
                 region,
+                endpoint,
+                forcePathStyle: true,
             });
         }
 
