@@ -129,12 +129,16 @@ const worker = new Worker(
       // 4. Transcribe with Whisper (Spanish)
       console.log("Transcribing with Whisper...");
       const transcriptions = await whisper(outputPath, {
-        modelName: "base", // You can change to 'small' for better accuracy but more CPU
+        modelName: "base",
         whisperOptions: {
-          language: "es", // Force Spanish
+          language: "es",
           gen_file_txt: false,
         }
       });
+
+      if (!transcriptions || !Array.isArray(transcriptions)) {
+        throw new Error("Whisper failed to return any transcription results");
+      }
 
       const fullText = transcriptions.map(t => t.speech).join(" ");
       console.log(`Transcription completed for bot ${botId}`);

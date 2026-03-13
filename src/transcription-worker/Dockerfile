@@ -19,6 +19,9 @@ COPY package.json pnpm-lock.yaml* ./
 # Install dependencies
 RUN pnpm install
 
+# Pre-download the whisper model using the CLI tool
+RUN npx whisper-node download base
+
 COPY . .
 
 # Run the worker
