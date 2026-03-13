@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { api } from "~/trpc/react";
 import Image from "next/image";
 import { BotDetailsDialog } from "~/app/bots/components/BotDetailsDialog";
+import { CreateBotDialog } from "~/app/bots/components/CreateBotDialog";
 import { Badge } from "~/components/ui/badge";
 import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
@@ -103,6 +104,7 @@ export default function BotsPage() {
             View and manage bots that have been created.
           </p>
         </div>
+        <CreateBotDialog />
       </div>
       <DataTable
         columns={columns}
