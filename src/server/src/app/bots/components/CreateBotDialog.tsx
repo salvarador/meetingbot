@@ -91,8 +91,8 @@ export function CreateBotDialog() {
             />
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={createBot.isLoading}>
-              {createBot.isLoading ? "Deploying..." : "Deploy Now"}
+            <Button type="submit" disabled={createBot.isPending}>
+              {createBot.isPending ? "Deploying..." : "Deploy Now"}
             </Button>
           </DialogFooter>
         </form>
