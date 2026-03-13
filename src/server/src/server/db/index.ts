@@ -3,6 +3,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { sql } from "drizzle-orm";
 import postgres from "postgres";
 import path from "path";
+import fs from "fs";
 
 import { env } from "~/env";
 import * as schema from "./schema";
@@ -37,14 +38,26 @@ if (env.NODE_ENV === "production" || process.env.RUN_MIGRATIONS === "true") {
       console.log("✅ Public schema reset successfully.");
     }
 
-    console.log("Running database migrations...");
+    const migrationsPath = path.resolve(process.cwd(), "drizzle");
+    console.log(`🔍 Checking migrations at: ${migrationsPath}`);
+    
+    if (!fs.existsSync(migrationsPath)) {
+      console.error(`❌ Migrations folder NOT FOUND at ${migrationsPath}`);
+      return;
+    }
+
+    const files = fs.readdirSync(migrationsPath);
+    console.log(`📂 Found ${files.length} items in migrations folder:`, files);
+
+    console.log("🚀 Running database migrations...");
     await migrate(db, { 
-      migrationsFolder: path.resolve(process.cwd(), "drizzle")
+      migrationsFolder: migrationsPath,
+      migrationsTable: "__drizzle_migrations"
     });
-    console.log("Migrations completed successfully");
+    console.log("✅ Migrations completed successfully");
   };
 
   runMigration().catch((err) => {
-    console.error("Migration failed:", err);
+    console.error("❌ Migration failed critical error:", err);
   });
 }
