@@ -19,8 +19,10 @@ COPY package.json pnpm-lock.yaml* ./
 # Install dependencies
 RUN pnpm install
 
-# Pre-download the whisper model using the CLI tool
-RUN npx whisper-node download base
+# Download the whisper model manually to avoid interactive TTY errors
+# We place it in the default directory where whisper-node expects it
+RUN mkdir -p ./node_modules/whisper-node/lib/whisper.cpp/models && \
+    wget -O ./node_modules/whisper-node/lib/whisper.cpp/models/ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 
 COPY . .
 
