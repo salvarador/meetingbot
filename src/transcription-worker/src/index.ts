@@ -114,20 +114,28 @@ const worker = new Worker(
           .on("error", reject);
       });
 
-      // 3. Extract audio (WAV 16kHz Mono + Normalization + Silence Removal)
-      console.log("Extracting, normalizing, and removing silence with FFmpeg...");
+      // 3. Extract audio (WAV 16kHz Mono)
+      console.log("Extracting audio with standard settings...");
       await new Promise((resolve, reject) => {
         ffmpeg(inputPath)
           .toFormat("wav")
           .audioChannels(1)
           .audioFrequency(16000)
-          // silenceremove=1:0.1:-50dB -> Remove silence at the start, 0.1s duration, below -50dB
-          // loudnorm -> Normalize volume
-          .audioFilters('silenceremove=1:0.1:-50dB,loudnorm') 
+          .audioCodec('pcm_s16le') // Standard format for Whisper
           .on("end", resolve)
-          .on("error", reject)
+          .on("error", (err) => {
+            console.error("FFmpeg Error:", err);
+            reject(err);
+          })
           .save(outputPath);
       });
+
+      const stats = fs.statSync(outputPath);
+      console.log(`📊 Generated WAV size: ${stats.size} bytes`);
+
+      if (stats.size < 1000) {
+        throw new Error("Extracted audio file is too small, likely empty.");
+      }
 
       // 4. Transcribe with Whisper (Spanish - Small Model)
       console.log("Transcribing with Whisper (Small model)...");
@@ -136,9 +144,9 @@ const worker = new Worker(
         whisperOptions: {
           language: "es",
           gen_file_txt: false,
-          // CRITICAL: Disable conditioning on previous text to stop repetition loops
-          // Adding no_speech_threshold helps ignore segments without actual speech
-          condition_on_previous_text: false, 
+          condition_on_previous_text: false,
+          // Help the model detect speech even if volume is low
+          temperature: 0, 
         }
       });
 
