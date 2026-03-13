@@ -16,6 +16,8 @@ class S3ClientSingleton {
   public static getInstance(): S3Client {
     S3ClientSingleton.instance ??= new S3Client({
       region: env.AWS_REGION,
+      endpoint: process.env.S3_ENDPOINT,
+      forcePathStyle: true,
       credentials: this.credentials,
     });
 
