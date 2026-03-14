@@ -107,7 +107,7 @@ export function CreateBotDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Transcription Provider</Label>
-              <Select value={provider} onValueChange={(val: any) => {
+              <Select value={provider} onValueChange={(val: "whisper" | "gemini") => {
                 setProvider(val);
                 setModel(val === "whisper" ? "small" : "gemini-3.1-flash");
               }}>
