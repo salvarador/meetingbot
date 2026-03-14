@@ -16,10 +16,20 @@ import { Plus } from "lucide-react";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+
 export function CreateBotDialog() {
   const [open, setOpen] = useState(false);
   const [meetingUrl, setMeetingUrl] = useState("");
   const [botDisplayName, setBotDisplayName] = useState("Railway Bot");
+  const [provider, setProvider] = useState<"whisper" | "gemini">("whisper");
+  const [model, setModel] = useState("small");
 
   const utils = api.useUtils();
   const createBot = api.bots.createBot.useMutation({
@@ -55,7 +65,10 @@ export function CreateBotDialog() {
         meetingUrl,
         platform,
       },
-      // Other fields will use defaults from the router
+      transcriptionSettings: {
+        provider,
+        model,
+      },
     });
   };
 
@@ -90,6 +103,50 @@ export function CreateBotDialog() {
               onChange={(e) => setBotDisplayName(e.target.value)}
             />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Transcription Provider</Label>
+              <Select value={provider} onValueChange={(val: any) => {
+                setProvider(val);
+                setModel(val === "whisper" ? "small" : "gemini-3.1-flash");
+              }}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="whisper">Local Whisper</SelectItem>
+                  <SelectItem value="gemini">Google Gemini AI</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Model</Label>
+              <Select value={model} onValueChange={setModel}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {provider === "whisper" ? (
+                    <>
+                      <SelectItem value="base">Whisper Base (Fast)</SelectItem>
+                      <SelectItem value="small">Whisper Small (Standard)</SelectItem>
+                      <SelectItem value="medium">Whisper Medium (Best Local)</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="gemini-3.1-flash">Gemini 3.1 Flash (Recommended)</SelectItem>
+                      <SelectItem value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Reasoning)</SelectItem>
+                      <SelectItem value="gemini-3-flash">Gemini 3 Flash</SelectItem>
+                      <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro (Stable)</SelectItem>
+                      <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button type="submit" disabled={createBot.isPending}>
               {createBot.isPending ? "Deploying..." : "Deploy Now"}
