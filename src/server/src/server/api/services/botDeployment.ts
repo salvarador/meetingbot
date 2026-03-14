@@ -59,6 +59,7 @@ export async function deployBot({
       botImage: bot.botImage ?? undefined,
       heartbeatInterval: bot.heartbeatInterval,
       automaticLeave: bot.automaticLeave,
+      transcriptionSettings: bot.transcriptionSettings,
       callbackUrl: bot.callbackUrl ?? undefined,
     };
 
