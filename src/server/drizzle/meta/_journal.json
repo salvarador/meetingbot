@@ -22,6 +22,13 @@
       "when": 1773411810472,
       "tag": "0002_freezing_gorilla_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773438135949,
+      "tag": "0003_talented_solo",
+      "breakpoints": true
     }
   ]
 }

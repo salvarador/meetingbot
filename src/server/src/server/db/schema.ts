@@ -207,6 +207,12 @@ export const transcriptionStatus = z.enum([
 ]);
 export type TranscriptionStatus = z.infer<typeof transcriptionStatus>;
 
+export const transcriptionSettingsSchema = z.object({
+  provider: z.enum(["whisper", "gemini"]).default("whisper"),
+  model: z.string().default("small"),
+});
+export type TranscriptionSettings = z.infer<typeof transcriptionSettingsSchema>;
+
 // Event codes include all status codes plus additional event-only codes
 const allEventCodes = [
   ...status.options,
@@ -273,6 +279,10 @@ export const bots = pgTable("bots", {
   transcriptionStatus: varchar("transcription_status", { length: 255 })
     .$type<TranscriptionStatus>()
     .default("PENDING"),
+  transcriptionSettings: json("transcription_settings")
+    .$type<TranscriptionSettings>()
+    .notNull()
+    .default({ provider: "whisper", model: "small" }),
   // config
   heartbeatInterval: integer("heartbeat_interval").notNull(),
   automaticLeave: json("automatic_leave").$type<AutomaticLeave>().notNull(),
@@ -290,6 +300,7 @@ export const insertBotSchema = z.object({
   endTime: z.date().optional(),
   heartbeatInterval: z.number().optional(),
   automaticLeave: automaticLeaveSchema.optional(),
+  transcriptionSettings: transcriptionSettingsSchema.optional(),
   callbackUrl: z
     .string()
     .url()
@@ -302,6 +313,7 @@ export const selectBotSchema = createSelectSchema(bots, {
   meetingInfo: meetingInfoSchema,
   automaticLeave: automaticLeaveSchema,
   speakerTimeframes: z.array(speakerTimeframeSchema),
+  transcriptionSettings: transcriptionSettingsSchema,
 });
 export type SelectBotType = z.infer<typeof selectBotSchema>;
 
@@ -316,6 +328,7 @@ export const botConfigSchema = z.object({
   botImage: z.string().url().optional(),
   heartbeatInterval: z.number(),
   automaticLeave: automaticLeaveSchema,
+  transcriptionSettings: transcriptionSettingsSchema,
   callbackUrl: z
     .string()
     .url()

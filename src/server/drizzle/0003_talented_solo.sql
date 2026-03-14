@@ -1,0 +1,1 @@
+ALTER TABLE "bots" ADD COLUMN "transcription_settings" json DEFAULT '{"provider":"whisper","model":"small"}'::json NOT NULL;
