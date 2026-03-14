@@ -33,9 +33,16 @@ if (env.NODE_ENV === "production" || process.env.RUN_MIGRATIONS === "true") {
   const runMigration = async () => {
     // FORCE RESET LOGIC: Only if RESET_DATABASE="true"
     if (process.env.RESET_DATABASE === "true") {
-      console.log("⚠️ RESET_DATABASE is true. Dropping public schema...");
-      await db.execute(sql`DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;`);
-      console.log("✅ Public schema reset successfully.");
+      console.log("⚠️ RESET_DATABASE is true. Starting emergency cleanup...");
+      try {
+        await db.execute(sql`DROP SCHEMA IF EXISTS public CASCADE`);
+        await db.execute(sql`CREATE SCHEMA public`);
+        await db.execute(sql`GRANT ALL ON SCHEMA public TO postgres`);
+        await db.execute(sql`GRANT ALL ON SCHEMA public TO public`);
+        console.log("✅ Database wiped and public schema recreated.");
+      } catch (e) {
+        console.error("❌ Error during RESET_DATABASE:", e);
+      }
     }
 
     const migrationsPath = path.resolve(process.cwd(), "drizzle");
@@ -46,13 +53,13 @@ if (env.NODE_ENV === "production" || process.env.RUN_MIGRATIONS === "true") {
       return;
     }
 
-    const files = fs.readdirSync(migrationsPath);
-    console.log(`📂 Found ${files.length} items in migrations folder:`, files);
+    const files = fs.readdirSync(migrationsPath).filter(f => f.endsWith('.sql'));
+    console.log(`📂 Found ${files.length} SQL migration files:`, files);
 
     console.log("🚀 Running database migrations...");
     await migrate(db, { 
       migrationsFolder: migrationsPath,
-      migrationsTable: "__drizzle_migrations"
+      migrationsTable: "drizzle_migrations" // Standard table name
     });
     console.log("✅ Migrations completed successfully");
   };
